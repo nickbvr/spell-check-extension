@@ -45,7 +45,7 @@ const getSelectedText = () => {
     let selectedValue;
     if (window.getSelection) {
         selectedValue = window.getSelection().toString();
-    } else if (document.selection && document.selection.type === 'Text') {
+    } else if (document.selection?.type === 'Text') {
         selectedValue = document.selection.createRange().text;
     }
     return selectedValue;
@@ -171,6 +171,8 @@ const wire = (input) => {
 
 const wireAll = (inputs) => inputs.forEach((input) => wire(input));
 
+const setPopupBackgroundColor = (background) => (popup.style.backgroundColor = background);
+
 mountPopupElement();
 
 document.addEventListener('click', handleClickOutside);
@@ -195,3 +197,11 @@ setInterval(() => {
         inputs = [...scheme.actual, ...scheme.unWired];
     }
 }, 2000);
+
+chrome.storage.sync.get(['background'], ({ background }) => setPopupBackgroundColor(background));
+
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'sync' && changes.background?.newValue) {
+        setPopupBackgroundColor(changes.background?.newValue);
+    }
+});
