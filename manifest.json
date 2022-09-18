@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "test name",
+    "description": "test description",
+    "version": "1.0",
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["./dist/content.js"],
+            "css": ["src/content.css"],
+            "all_frames": true
+        }
+    ],
+    "permissions": ["storage"],
+    "icons": {
+        "16": "/icons/spell-check.png",
+        "32": "/icons/spell-check.png",
+        "48": "/icons/spell-check.png",
+        "128": "/icons/spell-check.png"
+    }
+}
