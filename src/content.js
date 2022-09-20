@@ -1,5 +1,4 @@
 import KEY_CODES from './constants';
-import spellCheckService from './services';
 
 let popup;
 let activeInput;
@@ -7,6 +6,12 @@ let value = '';
 let valueArray = [];
 let selectedWord = '';
 let popupShown = false;
+
+let dictionary = [
+    { word: 'Cat', suggestions: ['Dog', 'Rat', 'bat'] },
+    { word: 'Helo', suggestions: ['hello', 'Help', 'Hell'] },
+    { word: 'heldp', suggestions: ['help', 'held', 'hello'] },
+];
 
 const getInputs = () => {
     return [
@@ -27,6 +32,13 @@ const getLastWord = () => {
     return valueArray[valueArray.length] ? value : valueArray[valueArray.length - 1];
 };
 
+const updatePopup = (val) => {
+    const foundWord = dictionary.find(
+        ({ word }) => word.toLowerCase() === val.trim().toLowerCase(),
+    );
+    foundWord && renderPopup(foundWord.suggestions);
+};
+
 const mountPopupElement = () => {
     popup = document.createElement('ul');
     popup.classList.add('popup');
@@ -34,11 +46,9 @@ const mountPopupElement = () => {
 };
 
 const handleClickOutside = (e) => {
-    !popup.contains(e.target) && hidePopup();
-};
-
-const updatePopup = (value) => {
-    spellCheckService.getSuggestions(value).then(renderPopup);
+    if (!popup.contains(e.target) && e.target !== activeInput) {
+        hidePopup();
+    }
 };
 
 const getSelectedText = () => {
@@ -52,8 +62,10 @@ const getSelectedText = () => {
 };
 
 const handleTextSelection = () => {
-    selectedWord = getSelectedText().trim();
-    selectedWord && updatePopup(selectedWord);
+    selectedWord = getSelectedText();
+    if (selectedWord) {
+        updatePopup(selectedWord);
+    }
 };
 
 const renderOptions = (data) => {
@@ -77,6 +89,7 @@ const handleOptionClick = (e) => {
 
 const getFocusItem = (e, data) => {
     e.preventDefault();
+    e.stopPropagation();
     let tabindex = +e.target.getAttribute('tabindex');
 
     if (e.keyCode === KEY_CODES.downArrow) {
@@ -146,27 +159,29 @@ const renderPopup = (data) => {
 };
 
 const handleInputKeyDown = (e) => {
-    switch (e.keyCode) {
-        case KEY_CODES.space:
-            updatePopup(getLastWord());
-            break;
-        case KEY_CODES.upArrow:
-        case KEY_CODES.downArrow:
-            focusOnPopup();
-            e.preventDefault();
-            break;
-        default:
-            hidePopup();
-            setValueFromEvent(e);
-            setActiveInput(e.target);
-            break;
-    }
+    setTimeout(() => {
+        switch (e.keyCode) {
+            case KEY_CODES.space:
+                updatePopup(getLastWord());
+                break;
+            case KEY_CODES.upArrow:
+            case KEY_CODES.downArrow:
+                focusOnPopup();
+                e.preventDefault();
+                break;
+            default:
+                setValueFromEvent(e);
+                setActiveInput(e.target);
+                hidePopup();
+                break;
+        }
+    }, 0);
 };
 
 const wire = (input) => {
     input.onmouseup = handleTextSelection;
     input.onkeyup = handleTextSelection;
-    input.addEventListener('keydown', handleInputKeyDown);
+    input.onkeydown = handleInputKeyDown;
 };
 
 const wireAll = (inputs) => inputs.forEach((input) => wire(input));
