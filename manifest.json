@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
-    "name": "test name",
-    "description": "test description",
+    "name": "spell-check-extension",
+    "description": "spell-check-extension",
     "version": "1.0",
     "action": {
         "default_popup": "./src/popup.html"

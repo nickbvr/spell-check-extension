@@ -1,4 +1,5 @@
 import KEY_CODES from './constants';
+import spellCheckService from './services';
 
 let popup;
 let activeInput;
@@ -7,16 +8,10 @@ let valueArray = [];
 let selectedWord = '';
 let popupShown = false;
 
-let dictionary = [
-    { word: 'Cat', suggestions: ['Dog', 'Rat', 'bat'] },
-    { word: 'Helo', suggestions: ['hello', 'Help', 'Hell'] },
-    { word: 'heldp', suggestions: ['help', 'held', 'hello'] },
-];
-
 const getInputs = () => {
     return [
         ...document.querySelectorAll(`input[type='text']`),
-        ...document.querySelectorAll('textarea'),
+        ...document.querySelectorAll(`textarea`),
         ...document.querySelectorAll(`div[contenteditable='true']`),
     ];
 };
@@ -32,12 +27,7 @@ const getLastWord = () => {
     return valueArray[valueArray.length] ? value : valueArray[valueArray.length - 1];
 };
 
-const updatePopup = (val) => {
-    const foundWord = dictionary.find(
-        ({ word }) => word.toLowerCase() === val.trim().toLowerCase(),
-    );
-    foundWord && renderPopup(foundWord.suggestions);
-};
+const updatePopup = (value) => spellCheckService.getSuggestions(value).then(renderPopup);
 
 const mountPopupElement = () => {
     popup = document.createElement('ul');
@@ -46,9 +36,7 @@ const mountPopupElement = () => {
 };
 
 const handleClickOutside = (e) => {
-    if (!popup.contains(e.target) && e.target !== activeInput) {
-        hidePopup();
-    }
+    !popup.contains(e.target) && e.target !== activeInput && hidePopup();
 };
 
 const getSelectedText = () => {
@@ -62,10 +50,8 @@ const getSelectedText = () => {
 };
 
 const handleTextSelection = () => {
-    selectedWord = getSelectedText();
-    if (selectedWord) {
-        updatePopup(selectedWord);
-    }
+    selectedWord = getSelectedText().trim();
+    selectedWord && updatePopup(selectedWord);
 };
 
 const renderOptions = (data) => {
